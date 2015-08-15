@@ -82,7 +82,7 @@ lazy val generic = project
   .settings(moduleName := "circe-generic")
   .settings(allSettings)
   .settings(
-    libraryDependencies += "com.chuusai" %% "shapeless" % "2.2.5"
+    libraryDependencies += "com.github.alexarchambault" %% "shapeless" % "2.2.6-SNAPSHOT"
   )
   .dependsOn(core, core % "test->test")
 

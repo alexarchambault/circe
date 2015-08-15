@@ -6,7 +6,6 @@ import io.circe.{ Decoder, Encoder, Json }
 import io.circe.generic.semiauto._
 import io.circe.test.{ CodecTests, CirceSuite }
 import org.scalacheck.Prop.forAll
-import shapeless.CNil
 
 class SemiautoCodecTests extends CirceSuite with Examples {
   import tuple._
@@ -82,13 +81,5 @@ class SemiautoCodecTests extends CirceSuite with Examples {
         Json.array(Json.int(i), Json.string(s), Json.numberOrNull(d)).as[(Int, String)].isLeft
       }
     }
-  }
-
-  test("Decoding with Decoder[CNil] should fail") {
-    assert(Json.empty.as[CNil].isLeft)
-  }
-
-  test("Encoding with Encoder[CNil] should throw an exception") {
-    intercept[RuntimeException](Encoder[CNil].apply(null: CNil))
   }
 }

@@ -8,9 +8,8 @@ package io.circe.generic
  * sealed trait hierarchies, tuples, etc.
  */
 object auto
-  extends BaseInstances
+  extends SingletonInstances
+  with DerivedInstances
+  with DefaultProductCodec
+  with DefaultSumCodec
   with IncompleteInstances
-  with TupleInstances
-  with LabelledInstances
-  with GenericInstances
-  with HListInstances

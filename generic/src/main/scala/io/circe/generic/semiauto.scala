@@ -1,7 +1,8 @@
 package io.circe.generic
 
-import io.circe.{ Decoder, JsonObject, ObjectEncoder }
-import shapeless.LabelledGeneric
+import io.circe.generic.derive.{MkEncodeJson, MkDecodeJson}
+import io.circe.{Encoder, Decoder}
+import shapeless.{LowPriority, Strict, IsTuple}
 
 /**
  * Semi-automatic codec derivation.
@@ -23,25 +24,41 @@ import shapeless.LabelledGeneric
  * }}}
  */
 object semiauto
-  extends BaseInstances
-  with LabelledInstances
-  with HListInstances {
-  object tuple extends TupleInstances
+  extends SingletonInstances
+  with DefaultProductCodec
+  with DefaultSumCodec {
+
   object incomplete extends IncompleteInstances
+
+  object tuple {
+    implicit def mkTupleDerivedDecoder[T]
+     (implicit
+       ev: IsTuple[T],
+       instance: Strict[LowPriority[Decoder[T], MkDecodeJson[T]]]
+     ): Decoder[T] =
+      instance.value.value.decodeJson
+
+    implicit def mkTupleDerivedEncoder[T]
+     (implicit
+       ev: IsTuple[T],
+       instance: Strict[LowPriority[Encoder[T], MkEncodeJson[T]]]
+     ): Encoder[T] =
+      instance.value.value.encodeJson
+  }
+
 
   def deriveFor[A]: DerivationHelper[A] = new DerivationHelper[A]
 
   class DerivationHelper[A] {
-    def encoder[R](implicit
-      gen: LabelledGeneric.Aux[A, R],
-      e: ObjectEncoder[R]
-    ): ObjectEncoder[A] = new ObjectEncoder[A] {
-      def encodeObject(a: A): JsonObject = e.encodeObject(gen.to(a))
-    }
+    def encoder(implicit
+      instance: MkEncodeJson[A]
+    ): Encoder[A] =
+      instance.encodeJson
 
-    def decoder[R](implicit
-      gen: LabelledGeneric.Aux[A, R],
-      d: Decoder[R]
-    ): Decoder[A] = d.map(gen.from)
+    def decoder(implicit
+      instance: MkDecodeJson[A]
+    ): Decoder[A] =
+      instance.decodeJson
   }
+
 }
